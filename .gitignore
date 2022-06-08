@@ -1,0 +1,9 @@
+# 文件以及目录过滤
+# 过滤library目录
+SyncTime/Library/
+# 过滤.vs目录
+SyncTime/.vs/
+# 过滤Temp目录
+SyncTime/Temp/
+# 过滤obj目录
+SyncTime/obj/
