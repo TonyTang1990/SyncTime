@@ -19,11 +19,11 @@ public static class ByteUtilities
     }
 
     /// <summary>
-    /// 小端存储与大端存储的转换
+    /// 大端转小端
     /// </summary>
     /// <param name="x"></param>
     /// <returns></returns>
-    public static uint SwapEndian(ulong x)
+    public static uint ToLittleEndian(ulong x)
     {
         return (uint)(((x & 0x000000ff) << 24) +
         ((x & 0x0000ff00) << 8) +

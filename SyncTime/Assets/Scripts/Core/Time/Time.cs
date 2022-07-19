@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,29 +33,78 @@ public static class Time
     private static bool IsTimeSyncSuccess;
 
     /// <summary>
+    /// 同步网络UTC时间
+    /// </summary>
+    private static DateTime mSyncUTCTime;
+
+    /// <summary>
     /// 同步网络时间
     /// </summary>
     /// <returns></returns>
     public static bool SyncTime()
     {
         // 未来有服务器的话，改为和服务器对时
+        DateTime? syncDateTime = null;
         for(int i = 0, length = NTPHostList.Count; i < length; i++)
         {
             NTPClient.InitByHost(NTPHostList[i]);
-            if(NTPClient.SyncTime())
+            if(NTPClient.SyncTime(out syncDateTime))
             {
+                IsTimeSyncSuccess = true;
+                SetNowUTCTime((DateTime)syncDateTime);
                 return true;
             }
         }
+        IsTimeSyncSuccess = false;
+        Debug.LogError($"所有NTP地址都同步时间失败!");
         return false;
     }
 
     /// <summary>
-    /// 设置当前时间戳(UTC)
+    /// 设置当前UTC时间
     /// </summary>
-    /// <param name="nowTimeStamp"></param>
-    public static void SetNowTime(int nowTimeStamp)
+    /// <param name="nowDateTime"></param>
+    public static void SetNowUTCTime(DateTime nowDateTime)
     {
+        mSyncUTCTime = nowDateTime;
+        if(mSyncUTCTime != null)
+        {
+            Debug.Log($"设置当前时间:{mSyncUTCTime.ToString()}");
+        }
+        else
+        {
+            Debug.Log($"清空当前同步时间!");
+        }
+    }
 
+    /// <summary>
+    /// 是否同步网络时间成功
+    /// </summary>
+    /// <returns></returns>
+    public static bool IsSyncTimeSuccess()
+    {
+        return IsTimeSyncSuccess;
+    }
+
+    /// <summary>
+    /// 获取当前同步UTC时间(没有成功同步返回本地UTC时间)
+    /// </summary>
+    /// <returns></returns>
+    public static DateTime GetSyncNowUTCTime()
+    {
+        if(IsTimeSyncSuccess)
+        {
+            return mSyncUTCTime;
+        }
+        return GetLocalNowUTCTime();
+    }
+
+    /// <summary>
+    /// 获取本地当前UTC时间
+    /// </summary>
+    /// <returns></returns>
+    public static DateTime GetLocalNowUTCTime()
+    {
+        return DateTime.UtcNow;
     }
 }
