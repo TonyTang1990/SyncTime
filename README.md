@@ -23,15 +23,11 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 [通过在网络报文上打「时间戳」的方式，然后配合计算网络延迟，从而修正本机的时间。](https://www.zhihu.com/question/21045190)
 
-![网络对时请求](/Img/SyncTime/NTPTimeCaculation.jpg)
-
-[根据图示可以计算出网络「传输延迟」，以及客户端与服务端的「时间差」：](https://www.zhihu.com/question/21045190)
+![网络对时请求](/img/SyncTime/NTPTimeCaculation.jpg)
 
 [网络延时 = (t4 - t1) - (t3 - t2)](https://www.zhihu.com/question/21045190)
 
 [网络延时 = (t4 - t1) - (t3 - t2)](https://www.zhihu.com/question/21045190)
-
-[这个计算过程假设网络来回路径是对称的，并且时延相同。](https://www.zhihu.com/question/21045190)
 
 [NTP报文格式](/img/SyncTime/NTPDataContent.png)
 
@@ -57,8 +53,6 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 从上面可以看到通过NTP的对时后，我们成功获取到了网络的UTC时间。
 
-**当前同步网络时间公式:**
-
 **当前同步网络时间 = 网络对时 + (本地运行时长 - 对时时本地运行时长)**
 
 ![当前同步网络UTC时间](/img/Sync/AfterSyncAddRealtime.PNG)
@@ -75,4 +69,4 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 ## 博客
 
-[SyncTime](https://github.com/TonyTang1990/SyncTime)
+[网络对时](http://tonytang1990.github.io/2022/07/16/%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5/)
