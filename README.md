@@ -55,7 +55,7 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 **当前同步网络时间 = 网络对时 + (本地运行时长 - 对时时本地运行时长)**
 
-![当前同步网络UTC时间](/img/Sync/AfterSyncAddRealtime.PNG)
+![当前同步网络UTC时间](/img/SyncTime/AfterSyncAddRealtime.PNG)
 
 **可以看到我成功的通过网络对时和记录本地真实运行时间等信息成功计算出了当前网络对时时间。**
 
