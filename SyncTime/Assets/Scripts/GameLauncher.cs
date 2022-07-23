@@ -21,14 +21,29 @@ public class GameLauncher : MonoBehaviour
     public Button SyncTimeBtn;
 
     /// <summary>
-    /// 网络同步时间文本
+    /// 网络同步UTC时间文本
     /// </summary>
     public Text SyncNowTimeTxt;
 
     /// <summary>
-    /// 本地时间文本
+    /// 网络同步本地时区时间文本
     /// </summary>
-    public Text LocalNowTimeTxt;
+    public Text SyncNowLocalTimeTxt;
+
+    /// <summary>
+    /// 本地UTC时间文本
+    /// </summary>
+    public Text LocalNowUTCTimeTxt;
+
+    /// <summary>
+    /// 本地时区时间文本
+    /// </summary>
+    public Text LocalNowLocalTimeTxt;
+
+    private void Start()
+    {
+        NTPClient.Singleton.SetHostList(NTPHostConfig.NTPHostList);
+    }
 
     /// <summary>
     /// 响应同步时间按钮点击
@@ -36,18 +51,26 @@ public class GameLauncher : MonoBehaviour
     public void OnSyncTimeBtnClick()
     {
         Debug.Log($"OnSyncTimeBtnClick()");
-        Time.SyncTime();
+        NTPClient.Singleton.SyncTime();
     }
 
     public void Update()
     {
         if (SyncNowTimeTxt != null)
         {
-            SyncNowTimeTxt.text = $"当前同步网络时间:{Time.GetSyncNowUTCTime().ToString()}";
+            SyncNowTimeTxt.text = $"对时UTC时间:{TimeHelper.GetNowUTCTime().ToString()}";
         }
-        if (LocalNowTimeTxt != null)
+        if (SyncNowLocalTimeTxt != null)
         {
-            LocalNowTimeTxt.text = $"当前本地同步时间:{Time.GetLocalNowUTCTime().ToString()}";
+            SyncNowLocalTimeTxt.text = $"对时本地时区时间:{TimeHelper.GetNowLocalTime().ToString()}";
+        }
+        if (LocalNowUTCTimeTxt != null)
+        {
+            LocalNowUTCTimeTxt.text = $"本地UTC时间:{TimeHelper.GetLocalNowUTCTime().ToString()}";
+        }
+        if (LocalNowLocalTimeTxt != null)
+        {
+            LocalNowLocalTimeTxt.text = $"本地时区时间:{TimeHelper.GetLocalNowTime().ToString()}";
         }
     }
 }

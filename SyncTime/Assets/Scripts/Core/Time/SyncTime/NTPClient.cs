@@ -1,7 +1,7 @@
 ﻿/*
  * Description:             NTPClient.cs
- * Author:                  #AUTHOR#
- * Create Date:             #CREATEDATE#
+ * Author:                  TonyTang
+ * Create Date:             2022/07/15
  */
 
 using System;
@@ -15,7 +15,7 @@ using UnityEngine;
 /// NTPClient.cs
 /// NTP客户端
 /// </summary>
-public class NTPClient
+public class NTPClient : SingletonTemplate<NTPClient>
 {
     /// <summary>
     /// 对时网络地址(直接传IP地址时无值)
@@ -44,7 +44,7 @@ public class NTPClient
     /// NTP Socket
     /// </summary>
     private Socket mNTPSocket;
-    
+
     /// <summary>
     /// NTP请求数据
     /// </summary>
@@ -71,21 +71,83 @@ public class NTPClient
     /// </summary>
     private readonly DateTime UTCBaseTime = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
+    /// <summary>
+    /// NTP网址列表
+    /// </summary>
+    private List<string> mNTPHostList;
+
+    /// <summary>
+    /// 时间同步是否成功
+    /// </summary>
+    private bool IsTimeSyncSuccess;
+
     public NTPClient()
     {
-        mNTPSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         mNtpSendData = new byte[48];
         // Setting the Leap Indicator, Version Number and Mode values
         // LI = 0 (no warning), VN = 3 (IPv4 only), Mode = 3 (Client Mode)
         mNtpSendData[0] = 0x1B;
         mNtpReceiveData = new byte[48];
+        IsTimeSyncSuccess = false;
+    }
+
+    /// <summary>
+    /// 设置NTP网址列表
+    /// </summary>
+    /// <param name="ntpHostList"></param>
+    public bool SetHostList(List<string> ntpHostList)
+    {
+        mNTPHostList = ntpHostList;
+        if (!HasHost())
+        {
+            Debug.LogError($"请勿设置空NTP网址列表!");
+            return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 同步网络时间
+    /// </summary>
+    /// <returns></returns>
+    public bool SyncTime()
+    {
+        // 未来有服务器的话，改为和服务器对时
+        if(!HasHost())
+        {
+            Debug.Log($"没有有效NTP网址,对时失败!");
+            return false;
+        }
+        DateTime? syncDateTime = null;
+        for (int i = 0, length = mNTPHostList.Count; i < length; i++)
+        {
+            InitByHost(mNTPHostList[i]);
+            if (SyncTime(out syncDateTime))
+            {
+                IsTimeSyncSuccess = true;
+                TimeHelper.SetNowUTCTime((DateTime)syncDateTime);
+                return true;
+            }
+        }
+        IsTimeSyncSuccess = false;
+        Debug.LogError($"所有NTP地址都同步时间失败!");
+        return false;
+    }
+
+    /// <summary>
+    /// 网络对时是否成功
+    /// </summary>
+    /// <returns></returns>
+    public bool IsSyncTimeSuccess()
+    {
+        return IsTimeSyncSuccess;
     }
 
     /// <summary>
     /// 初始化对时地址
     /// </summary>
     /// <param name="host"></param>
-    public bool InitByHost(string host)
+    private bool InitByHost(string host)
     {
         Host = host;
         IPEnd = null;
@@ -106,7 +168,7 @@ public class NTPClient
     /// 初始化对时IP地址
     /// </summary>
     /// <param name="ip"></param>
-    public bool InitByIP(string ip)
+    private bool InitByIP(string ip)
     {
         Host = null;
         IPEnd = null;
@@ -128,13 +190,15 @@ public class NTPClient
     /// </summary>
     /// <param name="syncDateTime"></param>
     /// <returns></returns>
-    public bool SyncTime(out DateTime? syncDateTime)
+    private bool SyncTime(out DateTime? syncDateTime)
     {
         syncDateTime = null;
         if (IPEnd != null)
         {
             try
             {
+                mNTPSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                Debug.Log($"网址:{Host} IP地址:{IPEnd.ToString()}");
                 mNTPSocket.Connect(IPEnd);
                 mNTPSocket.ReceiveTimeout = 3000;
                 // 客户端发送时间
@@ -147,7 +211,7 @@ public class NTPClient
                 // 客户端接收时间
                 ulong clientReceiveTime = (ulong)DateTime.UtcNow.Millisecond;
                 Debug.Log($"客户端接收时间:{clientReceiveTime}");
-                mNTPSocket.Close();
+                mNTPSocket.Shutdown(SocketShutdown.Both);
                 // 服务器接受消息时间
                 var serverReceivedTime = GetMilliSeconds(mNtpReceiveData, ServerReceivedTimePos);
                 Debug.Log($"服务器接受消息时间:{serverReceivedTime}");
@@ -157,22 +221,37 @@ public class NTPClient
                 // 网路延时 = (客户端接收时间 - 客户端发送时间) - (服务器返回消息时间 - 服务器接受消息时间)
                 // 时间差 = 服务器接受消息时间 - 客户端发送时间 - 网络延时 / 2 = ((服务器接受消息时间 - 客户端发送时间) + (服务器返回消息时间 - 客户端接收时间)) / 2
                 // 当前同步服务器时间 = 客户端接收时间 + 时间差
-                var syncTime = clientReceiveTime + ((serverReceivedTime - clientSendTime) + (serverReplyTime - clientReceiveTime)) / 2;
-                Debug.Log($"IP地址:{IPEnd.ToString()},当前同步时间:{syncTime}");
+                var offsetTime = ((serverReceivedTime - clientSendTime) + (serverReplyTime - clientReceiveTime)) / 2;
+                var syncTime = clientReceiveTime + offsetTime;
                 syncDateTime = UTCBaseTime.AddMilliseconds(syncTime);
+                Debug.Log($"IP地址:{IPEnd.ToString()},当前同步UTC时间:{syncDateTime.ToString()}");
                 return true;
             }
             catch(SocketException e)
             {
                 Debug.LogError($"IP地址:{IPEnd.ToString()}连接异常:{e.Message},ErrorCode:{e.ErrorCode}!");
-                return false;
             }
+            finally
+            {
+                //关闭Socket并释放资源
+                mNTPSocket.Close();
+            }
+            return false;
         }
         else
         {
             Debug.LogError($"未初始化IP地址,网络对时失败!");
             return false;
         }
+    }
+
+    /// <summary>
+    /// 是否有NTP网址
+    /// </summary>
+    /// <returns></returns>
+    private bool HasHost()
+    {
+        return mNTPHostList != null && mNTPHostList.Count > 0;
     }
 
     /// <summary>
