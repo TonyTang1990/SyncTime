@@ -27,8 +27,6 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 [网络延时 = (t4 - t1) - (t3 - t2)](https://www.zhihu.com/question/21045190)
 
-[网络延时 = (t4 - t1) - (t3 - t2)](https://www.zhihu.com/question/21045190)
-
 ![NTP报文格式](/img/SyncTime/NTPDataContent.png)
 
 **可以看到通过包含发送，接收，返回和返回接收时间戳的方式，我们可以计算出网络延迟从而做到正确的同步的网络时间**
