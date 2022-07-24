@@ -63,6 +63,8 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 接下来加入Unix时间戳概念。
 
+**当前时间戳 = 当前同步网络时间 - Unix时间戳基准时间(1970/1/1)**
+
 同步UTC时间前时间戳:
 
 ![同步UTC时间前时间戳](/img/SyncTime/BeforeSyncUnixTimeStamp.PNG)
