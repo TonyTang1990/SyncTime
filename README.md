@@ -47,7 +47,11 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 **这里我把本地时间同步关闭，并修改时间从2022/07/22 00:06到2022/07/24/03:06时间**
 
+同步时间前:
+
 ![同步时间前](/img/SyncTime/BeforeSyncTime.PNG)
+
+同步时间后:
 
 ![同步时间后](/img/SyncTime/AfterSyncTime.PNG)
 
@@ -59,9 +63,13 @@ NTP(Network Time Protocol)(网络对时服务)**
 
 **可以看到我成功的通过网络对时和记录本地真实运行时间等信息成功计算出了当前网络对时时间。**
 
-加入Unix时间戳概念后:
+接下来加入Unix时间戳概念。
+
+同步UTC时间前时间戳:
 
 ![同步UTC时间前时间戳](/img/SyncTime/BeforeSyncUnixTimeStamp.PNG)
+
+同步UTC时间后时间戳:
 
 ![同步UTC时间后时间戳](/img/SyncTime/AfterSyncUnixTimeStamp.PNG)
 
