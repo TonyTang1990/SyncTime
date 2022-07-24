@@ -21,6 +21,11 @@ public class GameLauncher : MonoBehaviour
     public Button SyncTimeBtn;
 
     /// <summary>
+    /// 网络同步本地时区时间戳文本
+    /// </summary>
+    public Text SyncNowLocalTimeStampTxt;
+
+    /// <summary>
     /// 网络同步UTC时间文本
     /// </summary>
     public Text SyncNowTimeTxt;
@@ -29,6 +34,11 @@ public class GameLauncher : MonoBehaviour
     /// 网络同步本地时区时间文本
     /// </summary>
     public Text SyncNowLocalTimeTxt;
+
+    /// <summary>
+    /// 本地UTC时间戳文本
+    /// </summary>
+    public Text LocalNowUTCTimeStampTxt;
 
     /// <summary>
     /// 本地UTC时间文本
@@ -56,6 +66,10 @@ public class GameLauncher : MonoBehaviour
 
     public void Update()
     {
+        if (SyncNowLocalTimeStampTxt != null)
+        {
+            SyncNowLocalTimeStampTxt.text = $"对时UTC时间戳:{TimeHelper.GetNowUTCTimeStamp().ToString()}";
+        }
         if (SyncNowTimeTxt != null)
         {
             SyncNowTimeTxt.text = $"对时UTC时间:{TimeHelper.GetNowUTCTime().ToString()}";
@@ -63,6 +77,10 @@ public class GameLauncher : MonoBehaviour
         if (SyncNowLocalTimeTxt != null)
         {
             SyncNowLocalTimeTxt.text = $"对时本地时区时间:{TimeHelper.GetNowLocalTime().ToString()}";
+        }
+        if (LocalNowUTCTimeStampTxt != null)
+        {
+            LocalNowUTCTimeStampTxt.text = $"本地UTC时间戳:{TimeHelper.GetLocalNowUTCTimeStamp().ToString()}";
         }
         if (LocalNowUTCTimeTxt != null)
         {

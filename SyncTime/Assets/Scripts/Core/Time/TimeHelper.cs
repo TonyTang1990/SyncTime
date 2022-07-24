@@ -15,6 +15,11 @@ using UnityEngine;
 public static class TimeHelper
 {
     /// <summary>
+    /// Unix时间戳基准时间
+    /// </summary>
+    private static DateTime UnixBaseTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+    /// <summary>
     /// 同步网络UTC时间
     /// </summary>
     private static DateTime? mSyncUTCTime;
@@ -25,9 +30,14 @@ public static class TimeHelper
     private static DateTime? mSyncLocalTime;
 
     /// <summary>
-    /// 同步时间时的本地运行时间
+    /// 同步时间时的本地运行时间(未同步成功为0)
     /// </summary>
     private static float mSyncRealtime;
+
+    /// <summary>
+    /// 同步网络UTC时间戳(未同步成功为0)
+    /// </summary>
+    private static long mSyncUTCTimeStamp;
 
     /// <summary>
     /// 设置当前UTC时间
@@ -40,14 +50,30 @@ public static class TimeHelper
         if (mSyncUTCTime != null)
         {
             mSyncRealtime = Time.realtimeSinceStartup;
-            Debug.Log($"同步时间时本地运行时间:{mSyncRealtime}");
+            var offsetTimeSpan = (DateTime)mSyncUTCTime - UnixBaseTime;
+            mSyncUTCTimeStamp = (long)offsetTimeSpan.TotalSeconds;
             Debug.Log($"同步当前UTC时间:{mSyncUTCTime.ToString()}");
             Debug.Log($"同步当前时区时间:{mSyncLocalTime.ToString()}");
+            Debug.Log($"同步时间时本地运行时间:{mSyncRealtime}");
+            Debug.Log($"同步时间UTC时间戳:{mSyncUTCTimeStamp}");
         }
         else
         {
+            mSyncRealtime = 0;
+            mSyncUTCTimeStamp = 0;
             Debug.Log($"清空当前同步时间!");
         }
+    }
+
+    /// <summary>
+    /// 获取当前同步UTC时间戳(没有成功同步返回本地UTC时间戳)
+    /// </summary>
+    /// <returns></returns>
+    public static long GetNowUTCTimeStamp()
+    {
+        var nowUTCTime = GetNowUTCTime();
+        var offsetSeconds = nowUTCTime - UnixBaseTime;
+        return (long)offsetSeconds.TotalSeconds;
     }
 
     /// <summary>
@@ -82,6 +108,15 @@ public static class TimeHelper
         {
             return GetLocalNowTime();
         }
+    }
+
+    /// <summary>
+    /// 获取本地当前UTC时间戳
+    /// </summary>
+    /// <returns></returns>
+    public static long GetLocalNowUTCTimeStamp()
+    {
+        return DateTimeOffset.UtcNow.ToUnixTimeSeconds();
     }
 
     /// <summary>
