@@ -262,11 +262,18 @@ public class NTPClient : SingletonTemplate<NTPClient>
     /// <returns></returns>
     private ulong GetMilliSeconds(byte[] byteDatas, int byteOffset)
     {
+        // Note:
         // 64bit时间戳，高32bit表示整数部分，低32bit表示小数部分
+        // 默认网络获取的时间戳是大端
         ulong intPart = BitConverter.ToUInt32(mNtpReceiveData, ServerReplyTimePos);
         ulong fractPart = BitConverter.ToUInt32(mNtpReceiveData, ServerReplyTimePos + 4);
-        intPart = ByteUtilities.ToLittleEndian(intPart);
-        fractPart = ByteUtilities.ToLittleEndian(fractPart);
+        // 转换成小端
+        if(ByteUtilities.IsLittleEndian)
+        {
+            // 注意只转换64里的低32位
+            intPart = ByteUtilities.SwapEndianU32(intPart);
+            fractPart = ByteUtilities.SwapEndianU32(fractPart);
+        }
         return (intPart * 1000) + ((fractPart * 1000) / 0x100000000UL);
     }
 }
